@@ -196,22 +196,21 @@ function drawNumberLine() {
       })
     );
 
-    if (isMajor) {
-      svg.appendChild(
-        createSvgNode(
-          "text",
-          {
-            x,
-            y: baseY + 36,
-            "text-anchor": "middle",
-            "font-size": "15",
-            fill: "var(--line)",
-            "font-family": "Manrope, sans-serif",
-          },
-          String(value)
-        )
-      );
-    }
+    svg.appendChild(
+      createSvgNode(
+        "text",
+        {
+          x,
+          y: baseY + (isMajor ? 36 : 50),
+          "text-anchor": "middle",
+          "font-size": isMajor ? "15" : "11",
+          fill: "var(--line)",
+          "font-family": "Manrope, sans-serif",
+          opacity: isMajor ? "1" : "0.88",
+        },
+        String(value)
+      )
+    );
   }
 
   const startX = xForValue(state.start);
