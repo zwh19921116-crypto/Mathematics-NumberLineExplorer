@@ -2,12 +2,15 @@ const svg = document.getElementById("numberLine");
 const operationEl = document.getElementById("operation");
 const firstNumberEl = document.getElementById("firstNumber");
 const secondNumberEl = document.getElementById("secondNumber");
+const firstSliderEl = document.getElementById("firstSlider");
+const secondSliderEl = document.getElementById("secondSlider");
 const speedEl = document.getElementById("speed");
 const playBtn = document.getElementById("playBtn");
 const stepBtn = document.getElementById("stepBtn");
 const resetBtn = document.getElementById("resetBtn");
 const equationEl = document.getElementById("equation");
 const explanationEl = document.getElementById("explanation");
+const animationHintEl = document.getElementById("animationHint");
 
 const state = {
   min: -12,
@@ -16,7 +19,11 @@ const state = {
   start: 0,
   result: 0,
   stepIndex: 0,
-  timer: null,
+  animationFrame: null,
+  runId: 0,
+  animating: false,
+  guideOriginal: { from: 0, to: 0, label: "Original" },
+  guideChange: { from: 0, to: 0, label: "Change" },
 };
 
 function parseIntSafe(value) {
@@ -65,6 +72,8 @@ function buildSteps(operation, a, b) {
   let explanation = "";
   let valid = true;
   let message = "";
+  let guideOriginal = { from: 0, to: 0, label: "Original" };
+  let guideChange = { from: 0, to: 0, label: "Change" };
 
   if (operation === "add") {
     start = a;
@@ -81,6 +90,8 @@ function buildSteps(operation, a, b) {
 
     equation = `${a} + ${b} = ${result}`;
     explanation = `Start at ${a}. Move ${Math.abs(b)} step(s) ${b >= 0 ? "to the right" : "to the left"}.`;
+    guideOriginal = { from: 0, to: a, label: `Original ${a}` };
+    guideChange = { from: a, to: result, label: `Change ${b >= 0 ? "+" : ""}${b}` };
   }
 
   if (operation === "subtract") {
@@ -99,6 +110,8 @@ function buildSteps(operation, a, b) {
     equation = `${a} - ${b} = ${result}`;
     const direction = b >= 0 ? "to the left" : "to the right";
     explanation = `Start at ${a}. Subtracting ${b} means move ${Math.abs(b)} step(s) ${direction}.`;
+    guideOriginal = { from: 0, to: a, label: `Original ${a}` };
+    guideChange = { from: a, to: result, label: `Change ${b >= 0 ? "-" : "+"}${Math.abs(b)}` };
   }
 
   if (operation === "multiply") {
@@ -116,6 +129,8 @@ function buildSteps(operation, a, b) {
 
     equation = `${a} × ${b} = ${result}`;
     explanation = `Multiplication is repeated jumps: jump ${stepSize} for ${totalSteps} time(s).`;
+    guideOriginal = { from: 0, to: a, label: `Original ${a}` };
+    guideChange = { from: 0, to: result, label: `Change ${result >= 0 ? "+" : ""}${result}` };
   }
 
   if (operation === "divide") {
@@ -140,10 +155,72 @@ function buildSteps(operation, a, b) {
 
       equation = `${a} ÷ ${b} = ${result}`;
       explanation = `Division counts equal jumps of size ${Math.abs(b)} until reaching ${a}. Total jumps = ${result}.`;
+      guideOriginal = { from: 0, to: a, label: `Original ${a}` };
+      guideChange = { from: 0, to: b, label: `Change per jump ${b}` };
     }
   }
 
-  return { jumps, start, result, equation, explanation, valid, message };
+  return { jumps, start, result, equation, explanation, valid, message, guideOriginal, guideChange };
+}
+
+function drawGuideArrow({ from, to, label, color, yOffset }) {
+  const baseY = 190;
+  const x1 = xForValue(from);
+  const x2 = xForValue(to);
+
+  if (Math.abs(x2 - x1) < 0.5) {
+    return;
+  }
+
+  const y = baseY + yOffset;
+  const markerId = `arrow-${color.replace("#", "")}`;
+  const defs = svg.querySelector("defs");
+
+  if (defs && !svg.querySelector(`#${markerId}`)) {
+    const marker = createSvgNode("marker", {
+      id: markerId,
+      markerWidth: "10",
+      markerHeight: "8",
+      refX: "9",
+      refY: "4",
+      orient: "auto",
+    });
+    marker.appendChild(
+      createSvgNode("path", {
+        d: "M0,0 L10,4 L0,8 z",
+        fill: color,
+      })
+    );
+    defs.appendChild(marker);
+  }
+
+  svg.appendChild(
+    createSvgNode("line", {
+      x1,
+      y1: y,
+      x2,
+      y2: y,
+      stroke: color,
+      "stroke-width": "3",
+      "marker-end": `url(#${markerId})`,
+      opacity: "0.85",
+      class: "guide-arrow",
+    })
+  );
+
+  svg.appendChild(
+    createSvgNode(
+      "text",
+      {
+        x: (x1 + x2) / 2,
+        y: y - 8,
+        "text-anchor": "middle",
+        fill: color,
+        class: "guide-label",
+      },
+      label
+    )
+  );
 }
 
 function drawNumberLine() {
@@ -240,21 +317,52 @@ function drawNumberLine() {
   );
 
   drawProgress();
+
+  drawGuideArrow({
+    ...state.guideOriginal,
+    color: "#007f5f",
+    yOffset: 58,
+  });
+
+  drawGuideArrow({
+    ...state.guideChange,
+    color: "#0f6ab4",
+    yOffset: 82,
+  });
 }
 
-function drawProgress() {
+function jumpArcHeight(jump) {
+  return 46 + (Math.abs(jump.to - jump.from) > 1 ? 14 : 0);
+}
+
+function getBezierPoint(jump, t) {
+  const baseY = 190;
+  const x1 = xForValue(jump.from);
+  const x2 = xForValue(jump.to);
+  const cx = (x1 + x2) / 2;
+  const cy = baseY - jumpArcHeight(jump);
+
+  const mt = 1 - t;
+  const x = mt * mt * x1 + 2 * mt * t * cx + t * t * x2;
+  const y = mt * mt * (baseY - 3) + 2 * mt * t * cy + t * t * (baseY - 3);
+  return { x, y };
+}
+
+function drawProgress(completedCount = state.stepIndex, activeJump = null, activeT = 0) {
   const baseY = 190;
 
-  const existing = svg.querySelectorAll(".jump, .jump-label, .current, .result-label");
+  const existing = svg.querySelectorAll(
+    ".jump, .jump-label, .current, .result-label, .active-hop, .traveler"
+  );
   existing.forEach((node) => node.remove());
 
   let currentPos = state.start;
 
-  for (let i = 0; i < state.stepIndex; i += 1) {
+  for (let i = 0; i < completedCount; i += 1) {
     const jump = state.jumps[i];
     const x1 = xForValue(jump.from);
     const x2 = xForValue(jump.to);
-    const arcHeight = 46 + (Math.abs(jump.to - jump.from) > 1 ? 14 : 0);
+    const arcHeight = jumpArcHeight(jump);
     const path = `M ${x1} ${baseY - 3} Q ${(x1 + x2) / 2} ${baseY - arcHeight} ${x2} ${baseY - 3}`;
 
     svg.appendChild(
@@ -262,8 +370,9 @@ function drawProgress() {
         d: path,
         class: "jump",
         fill: "none",
-        stroke: "var(--jump-active)",
-        "stroke-width": "3.5",
+        stroke: "var(--jump)",
+        opacity: "0.65",
+        "stroke-width": "2.8",
         "marker-end": "url(#arrow)",
       })
     );
@@ -286,6 +395,41 @@ function drawProgress() {
     );
 
     currentPos = jump.to;
+  }
+
+  if (activeJump) {
+    const x1 = xForValue(activeJump.from);
+    const x2 = xForValue(activeJump.to);
+    const arcHeight = jumpArcHeight(activeJump);
+    const path = `M ${x1} ${baseY - 3} Q ${(x1 + x2) / 2} ${baseY - arcHeight} ${x2} ${baseY - 3}`;
+
+    const activePath = createSvgNode("path", {
+      d: path,
+      class: "active-hop",
+      fill: "none",
+      stroke: "var(--jump-active)",
+      "stroke-width": "4",
+      "marker-end": "url(#arrow)",
+    });
+    svg.appendChild(activePath);
+
+    const totalLength = activePath.getTotalLength();
+    activePath.style.strokeDasharray = String(totalLength);
+    activePath.style.strokeDashoffset = String((1 - activeT) * totalLength);
+
+    const p = getBezierPoint(activeJump, activeT);
+    svg.appendChild(
+      createSvgNode("circle", {
+        cx: p.x,
+        cy: p.y,
+        r: "8",
+        class: "traveler",
+        fill: "#d83f31",
+      })
+    );
+
+    animationHintEl.textContent = `Hop ${completedCount + 1} of ${state.jumps.length}: ${activeJump.from} to ${activeJump.to}`;
+    return;
   }
 
   const currentX = xForValue(currentPos);
@@ -316,13 +460,19 @@ function drawProgress() {
         "Result"
       )
     );
+
+    animationHintEl.textContent = `Complete. Result is ${state.result}.`;
+  } else {
+    animationHintEl.textContent = `Ready. Press Play Animation, or Step Once to move one hop.`;
   }
 }
 
 function stopAnimation() {
-  if (state.timer) {
-    clearInterval(state.timer);
-    state.timer = null;
+  state.runId += 1;
+  state.animating = false;
+  if (state.animationFrame) {
+    cancelAnimationFrame(state.animationFrame);
+    state.animationFrame = null;
   }
 }
 
@@ -343,6 +493,9 @@ function applyScenario() {
     state.stepIndex = 0;
     state.min = -12;
     state.max = 12;
+    state.guideOriginal = { from: 0, to: 0, label: "Original" };
+    state.guideChange = { from: 0, to: 0, label: "Change" };
+    animationHintEl.textContent = model.message;
     drawNumberLine();
     return;
   }
@@ -351,6 +504,8 @@ function applyScenario() {
   state.start = model.start;
   state.result = model.result;
   state.stepIndex = 0;
+  state.guideOriginal = model.guideOriginal;
+  state.guideChange = model.guideChange;
 
   const allValues = [state.start, state.result, ...state.jumps.flatMap((j) => [j.from, j.to])];
   const range = clampRange(allValues);
@@ -359,18 +514,66 @@ function applyScenario() {
 
   equationEl.textContent = model.equation;
   explanationEl.textContent = model.explanation;
+  animationHintEl.textContent = `Original value ${a}. Change value ${b}.`;
   drawNumberLine();
 }
 
 function stepForward() {
-  if (state.stepIndex < state.jumps.length) {
-    state.stepIndex += 1;
-    drawProgress();
+  if (!state.animating && state.stepIndex < state.jumps.length) {
+    animateSingleHop(state.stepIndex, Math.max(220, parseIntSafe(speedEl.value) || 550));
   }
 }
 
-function playAnimation() {
+function wait(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function animateSingleHop(index, duration, runId = state.runId) {
+  if (index >= state.jumps.length) {
+    return Promise.resolve();
+  }
+
+  state.animating = true;
+  const jump = state.jumps[index];
+
+  return new Promise((resolve) => {
+    const start = performance.now();
+
+    const frame = (now) => {
+      if (runId !== state.runId) {
+        state.animating = false;
+        resolve();
+        return;
+      }
+
+      const elapsed = now - start;
+      const t = Math.min(1, elapsed / duration);
+      drawProgress(index, jump, easeInOutCubic(t));
+
+      if (t < 1) {
+        state.animationFrame = requestAnimationFrame(frame);
+        return;
+      }
+
+      state.stepIndex = index + 1;
+      state.animating = false;
+      drawProgress();
+      resolve();
+    };
+
+    state.animationFrame = requestAnimationFrame(frame);
+  });
+}
+
+async function playAnimation() {
   stopAnimation();
+  const runId = state.runId;
 
   if (state.stepIndex >= state.jumps.length) {
     state.stepIndex = 0;
@@ -381,24 +584,71 @@ function playAnimation() {
     return;
   }
 
-  const speed = parseIntSafe(speedEl.value) || 550;
-  state.timer = setInterval(() => {
-    if (state.stepIndex >= state.jumps.length) {
-      stopAnimation();
+  const speed = Math.max(220, parseIntSafe(speedEl.value) || 550);
+  for (let i = state.stepIndex; i < state.jumps.length; i += 1) {
+    if (runId !== state.runId) {
       return;
     }
-    stepForward();
-  }, speed);
+    await animateSingleHop(i, speed, runId);
+    if (i < state.jumps.length - 1) {
+      await wait(70);
+    }
+  }
 }
 
 operationEl.addEventListener("change", applyScenario);
-firstNumberEl.addEventListener("input", applyScenario);
-secondNumberEl.addEventListener("input", applyScenario);
+
+firstSliderEl.addEventListener("input", () => {
+  firstNumberEl.value = firstSliderEl.value;
+  applyScenario();
+});
+
+secondSliderEl.addEventListener("input", () => {
+  secondNumberEl.value = secondSliderEl.value;
+  applyScenario();
+});
+
+firstNumberEl.addEventListener("input", () => {
+  firstSliderEl.value = String(parseIntSafe(firstNumberEl.value));
+  applyScenario();
+});
+
+secondNumberEl.addEventListener("input", () => {
+  secondSliderEl.value = String(parseIntSafe(secondNumberEl.value));
+  applyScenario();
+});
+
 playBtn.addEventListener("click", playAnimation);
 stepBtn.addEventListener("click", () => {
   stopAnimation();
   stepForward();
 });
 resetBtn.addEventListener("click", applyScenario);
+
+function setSliderBounds() {
+  const op = operationEl.value;
+
+  if (op === "divide") {
+    firstSliderEl.min = "0";
+    firstSliderEl.max = "40";
+    secondSliderEl.min = "-12";
+    secondSliderEl.max = "12";
+  } else {
+    firstSliderEl.min = "-20";
+    firstSliderEl.max = "20";
+    secondSliderEl.min = "-20";
+    secondSliderEl.max = "20";
+  }
+}
+
+operationEl.addEventListener("change", () => {
+  setSliderBounds();
+  firstSliderEl.value = String(parseIntSafe(firstNumberEl.value));
+  secondSliderEl.value = String(parseIntSafe(secondNumberEl.value));
+});
+
+setSliderBounds();
+firstSliderEl.value = String(parseIntSafe(firstNumberEl.value));
+secondSliderEl.value = String(parseIntSafe(secondNumberEl.value));
 
 applyScenario();

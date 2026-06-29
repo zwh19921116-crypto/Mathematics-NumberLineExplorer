@@ -120,6 +120,11 @@ select {
   background: #fff;
 }
 
+input[type="range"] {
+  padding: 0;
+  accent-color: var(--accent);
+}
+
 .button-row {
   margin-top: 0.95rem;
   display: flex;
@@ -163,6 +168,13 @@ select {
   font-family: "Fraunces", Georgia, serif;
   font-size: clamp(1.1rem, 2.1vw, 1.5rem);
   margin-bottom: 0.5rem;
+}
+
+.animation-hint {
+  margin: 0 0 0.65rem;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.94rem;
 }
 
 .number-line-wrap {
@@ -218,6 +230,29 @@ select {
 .explanation-panel p {
   margin: 0;
   line-height: 1.5;
+}
+
+.guide-label {
+  font-family: "Manrope", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.active-hop {
+  filter: drop-shadow(0 0 3px rgba(216, 63, 49, 0.45));
+}
+
+.traveler {
+  animation: travelerPulse 420ms ease-in-out infinite alternate;
+}
+
+@keyframes travelerPulse {
+  from {
+    r: 7;
+  }
+  to {
+    r: 9;
+  }
 }
 
 @keyframes rise {
