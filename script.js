@@ -7,7 +7,6 @@ const playBtn = document.getElementById("playBtn");
 const stepBtn = document.getElementById("stepBtn");
 const resetBtn = document.getElementById("resetBtn");
 const equationEl = document.getElementById("equation");
-const explanationEl = document.getElementById("explanation");
 
 const state = {
   min: -12,
@@ -336,7 +335,6 @@ function applyScenario() {
 
   if (!model.valid) {
     equationEl.textContent = `${a} ${operation === "divide" ? "÷" : "?"} ${b}`;
-    explanationEl.textContent = model.message;
     state.jumps = [];
     state.start = 0;
     state.result = 0;
@@ -358,7 +356,6 @@ function applyScenario() {
   state.max = range.max;
 
   equationEl.textContent = model.equation;
-  explanationEl.textContent = model.explanation;
   drawNumberLine();
 }
 
