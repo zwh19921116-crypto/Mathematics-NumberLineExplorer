@@ -201,9 +201,9 @@ function drawNumberLine() {
         "text",
         {
           x,
-          y: baseY - (isMajor ? 20 : 12),
+          y: baseY + (isMajor ? 26 : 38),
           "text-anchor": "middle",
-          "font-size": isMajor ? "14" : "11",
+          "font-size": isMajor ? "14" : "10",
           fill: "var(--line)",
           "font-family": "Manrope, sans-serif",
           opacity: isMajor ? "1" : "0.9",
