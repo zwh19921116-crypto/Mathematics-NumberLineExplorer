@@ -1,15 +1,16 @@
 :root {
-  --bg: #f6f4ee;
-  --panel: #fffefb;
+  --bg: #f2f4ef;
+  --panel: #fffdf8;
   --ink: #1f2228;
-  --muted: #5e6572;
+  --muted: #586273;
   --accent: #007f5f;
-  --accent-2: #ef8354;
+  --accent-2: #ee7b4a;
   --line: #2f3a46;
   --tick: #6f7a88;
   --jump: #0f6ab4;
   --jump-active: #d83f31;
-  --shadow: 0 14px 34px rgba(23, 34, 48, 0.12);
+  --ring: rgba(0, 127, 95, 0.25);
+  --shadow: 0 18px 40px rgba(23, 34, 48, 0.1);
 }
 
 * {
@@ -21,8 +22,9 @@ body {
   min-height: 100vh;
   font-family: "Manrope", "Segoe UI", sans-serif;
   color: var(--ink);
-  background: radial-gradient(circle at 12% 12%, #fff9e7 0%, transparent 42%),
-    radial-gradient(circle at 80% 22%, #dff4ea 0%, transparent 46%),
+  background: radial-gradient(circle at 10% 10%, #fff6da 0%, transparent 40%),
+    radial-gradient(circle at 82% 18%, #d8f2e5 0%, transparent 42%),
+    radial-gradient(circle at 45% 90%, #e9eff9 0%, transparent 45%),
     var(--bg);
   overflow-x: hidden;
 }
@@ -56,10 +58,14 @@ body {
 
 .app-shell {
   width: min(1100px, 92vw);
-  margin: 2rem auto;
+  margin: 2.2rem auto;
   display: grid;
-  gap: 1rem;
+  gap: 1.1rem;
   animation: rise 450ms ease-out;
+}
+
+.app-header {
+  max-width: 74ch;
 }
 
 .app-header h1 {
@@ -79,17 +85,22 @@ body {
 }
 
 .subtitle {
-  margin: 0.55rem 0 0;
+  margin: 0.65rem 0 0;
   color: var(--muted);
   max-width: 62ch;
+  line-height: 1.55;
 }
 
 .panel {
-  background: var(--panel);
-  border: 1px solid #ebe7dd;
-  border-radius: 18px;
+  background: linear-gradient(180deg, #fffefb, #fffcf5);
+  border: 1px solid #ebe5d7;
+  border-radius: 20px;
   box-shadow: var(--shadow);
-  padding: 1rem;
+  padding: 1.1rem;
+}
+
+.controls-panel {
+  border-top: 4px solid var(--accent);
 }
 
 .control-grid {
@@ -100,9 +111,10 @@ body {
 
 label {
   display: grid;
-  gap: 0.3rem;
-  font-size: 0.9rem;
+  gap: 0.35rem;
+  font-size: 0.88rem;
   font-weight: 600;
+  color: #2f3d4d;
 }
 
 input,
@@ -114,10 +126,18 @@ button {
 input,
 select {
   border: 1px solid #d9deea;
-  border-radius: 10px;
-  padding: 0.62rem 0.68rem;
+  border-radius: 12px;
+  padding: 0.68rem 0.75rem;
   color: var(--ink);
-  background: #fff;
+  background: #fffdfa;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+input:focus,
+select:focus {
+  border-color: #9dc8bc;
+  box-shadow: 0 0 0 3px var(--ring);
+  outline: none;
 }
 
 .button-row {
@@ -129,11 +149,12 @@ select {
 
 .btn {
   border: 0;
-  border-radius: 11px;
-  padding: 0.66rem 0.95rem;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
   font-weight: 700;
+  letter-spacing: 0.01em;
   cursor: pointer;
-  transition: transform 140ms ease, opacity 140ms ease;
+  transition: transform 140ms ease, opacity 140ms ease, box-shadow 140ms ease;
 }
 
 .btn:hover {
@@ -145,32 +166,39 @@ select {
 }
 
 .btn-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, #008f6b, #007255);
   color: #fff;
+  box-shadow: 0 8px 18px rgba(0, 127, 95, 0.25);
 }
 
 .btn-secondary {
-  background: #0077b6;
+  background: linear-gradient(135deg, #157fbe, #0e689d);
   color: #fff;
+  box-shadow: 0 8px 16px rgba(15, 106, 180, 0.22);
 }
 
 .btn-ghost {
-  background: #f2f5f9;
+  background: #edf2f7;
   color: #243447;
 }
 
 .equation-strip {
   font-family: "Fraunces", Georgia, serif;
-  font-size: clamp(1.1rem, 2.1vw, 1.5rem);
-  margin-bottom: 0.5rem;
+  font-size: clamp(1.2rem, 2.2vw, 1.55rem);
+  margin-bottom: 0.7rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #fff8e6, #f4fbf8);
+  border: 1px solid #efe7d2;
 }
 
 .number-line-wrap {
   width: 100%;
   overflow-x: auto;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #fffcf6, #f8fafc);
-  border: 1px solid #ece3cf;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fffdf8, #f7fafd);
+  border: 1px solid #e9debf;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
 }
 
 #numberLine {
@@ -180,12 +208,12 @@ select {
 }
 
 .legend {
-  margin-top: 0.65rem;
+  margin-top: 0.8rem;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  color: var(--muted);
-  font-size: 0.92rem;
+  color: #4f5a69;
+  font-size: 0.9rem;
 }
 
 .dot {
@@ -217,7 +245,8 @@ select {
 
 .explanation-panel p {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: #2e3d4d;
 }
 
 @keyframes rise {
@@ -238,6 +267,7 @@ select {
 
   .app-shell {
     margin: 1rem auto 1.2rem;
+    gap: 0.9rem;
   }
 }
 
