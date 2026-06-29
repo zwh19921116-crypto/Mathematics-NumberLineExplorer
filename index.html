@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Number Line Explorer</title>
+    <meta
+      name="description"
+      content="Interactive number line for teaching addition, subtraction, multiplication, and division."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Manrope:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-shape bg-shape-a" aria-hidden="true"></div>
+    <div class="bg-shape bg-shape-b" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <header class="app-header">
+        <p class="eyebrow">Mathematics Visual Learning</p>
+        <h1>Number Line Explorer</h1>
+        <p class="subtitle">
+          See each operation move on a number line with animated arrows.
+        </p>
+      </header>
+
+      <section class="panel controls-panel" aria-label="Learning controls">
+        <div class="control-grid">
+          <label>
+            Operation
+            <select id="operation">
+              <option value="add">Addition (+)</option>
+              <option value="subtract">Subtraction (−)</option>
+              <option value="multiply">Multiplication (×)</option>
+              <option value="divide">Division (÷)</option>
+            </select>
+          </label>
+
+          <label>
+            First Number
+            <input id="firstNumber" type="number" value="4" step="1" />
+          </label>
+
+          <label>
+            Second Number
+            <input id="secondNumber" type="number" value="3" step="1" />
+          </label>
+
+          <label>
+            Animation Speed
+            <select id="speed">
+              <option value="900">Slow</option>
+              <option value="550" selected>Normal</option>
+              <option value="250">Fast</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="button-row">
+          <button id="playBtn" class="btn btn-primary">Play Animation</button>
+          <button id="stepBtn" class="btn btn-secondary">Step Once</button>
+          <button id="resetBtn" class="btn btn-ghost">Reset</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Number line visualizer">
+        <div class="equation-strip">
+          <span id="equation">4 + 3 = 7</span>
+        </div>
+
+        <div id="numberLineWrap" class="number-line-wrap">
+          <svg id="numberLine" viewBox="0 0 1000 320" role="img" aria-label="Animated number line"></svg>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot dot-start"></i>Start</span>
+          <span><i class="dot dot-current"></i>Current Position</span>
+          <span><i class="dot dot-result"></i>Result</span>
+        </div>
+      </section>
+
+      <section class="panel explanation-panel" aria-live="polite">
+        <h2>How It Works</h2>
+        <p id="explanation"></p>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

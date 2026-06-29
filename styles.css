@@ -1,0 +1,252 @@
+:root {
+  --bg: #f6f4ee;
+  --panel: #fffefb;
+  --ink: #1f2228;
+  --muted: #5e6572;
+  --accent: #007f5f;
+  --accent-2: #ef8354;
+  --line: #2f3a46;
+  --tick: #6f7a88;
+  --jump: #0f6ab4;
+  --jump-active: #d83f31;
+  --shadow: 0 14px 34px rgba(23, 34, 48, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at 12% 12%, #fff9e7 0%, transparent 42%),
+    radial-gradient(circle at 80% 22%, #dff4ea 0%, transparent 46%),
+    var(--bg);
+  overflow-x: hidden;
+}
+
+.bg-shape {
+  position: fixed;
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+.bg-shape-a {
+  width: 280px;
+  height: 280px;
+  right: -80px;
+  top: 20%;
+  background: linear-gradient(180deg, #ffd166, #ef8354);
+  opacity: 0.22;
+  border-radius: 42% 58% 67% 33% / 45% 30% 70% 55%;
+}
+
+.bg-shape-b {
+  width: 340px;
+  height: 340px;
+  left: -120px;
+  bottom: -100px;
+  background: linear-gradient(120deg, #5cc8ff, #53b987);
+  opacity: 0.2;
+  border-radius: 64% 36% 40% 60% / 33% 55% 45% 67%;
+}
+
+.app-shell {
+  width: min(1100px, 92vw);
+  margin: 2rem auto;
+  display: grid;
+  gap: 1rem;
+  animation: rise 450ms ease-out;
+}
+
+.app-header h1 {
+  margin: 0;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(2rem, 2.8vw, 3rem);
+  line-height: 1.1;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-size: 0.78rem;
+}
+
+.subtitle {
+  margin: 0.55rem 0 0;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid #ebe7dd;
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+  padding: 1rem;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+input,
+select,
+button {
+  font: inherit;
+}
+
+input,
+select {
+  border: 1px solid #d9deea;
+  border-radius: 10px;
+  padding: 0.62rem 0.68rem;
+  color: var(--ink);
+  background: #fff;
+}
+
+.button-row {
+  margin-top: 0.95rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.btn {
+  border: 0;
+  border-radius: 11px;
+  padding: 0.66rem 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 140ms ease, opacity 140ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #0077b6;
+  color: #fff;
+}
+
+.btn-ghost {
+  background: #f2f5f9;
+  color: #243447;
+}
+
+.equation-strip {
+  font-family: "Fraunces", Georgia, serif;
+  font-size: clamp(1.1rem, 2.1vw, 1.5rem);
+  margin-bottom: 0.5rem;
+}
+
+.number-line-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fffcf6, #f8fafc);
+  border: 1px solid #ece3cf;
+}
+
+#numberLine {
+  width: 100%;
+  min-width: 760px;
+  display: block;
+}
+
+.legend {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.dot {
+  width: 0.72rem;
+  height: 0.72rem;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 0.4rem;
+  transform: translateY(1px);
+}
+
+.dot-start {
+  background: #007f5f;
+}
+
+.dot-current {
+  background: #d83f31;
+}
+
+.dot-result {
+  background: #7b2cbf;
+}
+
+.explanation-panel h2 {
+  margin: 0 0 0.5rem;
+  font-family: "Fraunces", Georgia, serif;
+  font-size: 1.3rem;
+}
+
+.explanation-panel p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 860px) {
+  .control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .app-shell {
+    margin: 1rem auto 1.2rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 0.85rem;
+  }
+}
