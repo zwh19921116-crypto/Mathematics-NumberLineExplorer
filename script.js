@@ -201,12 +201,12 @@ function drawNumberLine() {
         "text",
         {
           x,
-          y: baseY + (isMajor ? 36 : 50),
+          y: baseY - (isMajor ? 20 : 12),
           "text-anchor": "middle",
-          "font-size": isMajor ? "15" : "11",
+          "font-size": isMajor ? "14" : "11",
           fill: "var(--line)",
           "font-family": "Manrope, sans-serif",
-          opacity: isMajor ? "1" : "0.88",
+          opacity: isMajor ? "1" : "0.9",
         },
         String(value)
       )
