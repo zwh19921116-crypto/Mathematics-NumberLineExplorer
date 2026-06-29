@@ -79,7 +79,7 @@ function buildSteps(operation, a, b) {
       current = next;
     }
 
-    equation = `${a} + ${b} = ${result}`;
+    equation = `${a}+${b}=${result}`;
     explanation = `Starting number: ${a}. Operation: add ${b}. Move ${Math.abs(b)} step(s) ${b >= 0 ? "to the right" : "to the left"} to reach ${result}.`;
   }
 
@@ -96,7 +96,7 @@ function buildSteps(operation, a, b) {
       current = next;
     }
 
-    equation = `${a} - ${b} = ${result}`;
+    equation = `${a}-${b}=${result}`;
     const direction = b >= 0 ? "to the left" : "to the right";
     explanation = `Starting number: ${a}. Operation: subtract ${b}. Move ${Math.abs(b)} step(s) ${direction} to reach ${result}.`;
   }
@@ -114,7 +114,7 @@ function buildSteps(operation, a, b) {
       current = next;
     }
 
-    equation = `${a} × ${b} = ${result}`;
+    equation = `${a}×${b}=${result}`;
     explanation = `Starting number: ${a}. Operation: multiply by ${b}. This means repeated jumps of ${stepSize} for ${totalSteps} time(s), giving ${result}.`;
   }
 
@@ -138,7 +138,7 @@ function buildSteps(operation, a, b) {
         current = next;
       }
 
-      equation = `${a} ÷ ${b} = ${result}`;
+      equation = `${a}÷${b}=${result}`;
       explanation = `Starting number: ${a}. Operation: divide by ${b}. Count equal jumps of size ${Math.abs(b)} until reaching ${a}; total jumps is ${result}.`;
     }
   }
